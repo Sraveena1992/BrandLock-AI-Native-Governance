@@ -16,7 +16,10 @@ import {
   Award,
   CheckCircle,
   Users,
-  CheckSquare
+  CheckSquare,
+  Activity,
+  Database,
+  Server
 } from 'lucide-react';
 
 export default function App() {
@@ -33,7 +36,7 @@ export default function App() {
 
   const [agentLogs, setAgentLogs] = useState([]);
   
-  const [findings, setFindings] = useState([
+  const initialFindings = [
     {
       id: 1,
       category: 'Confidentiality Leak',
@@ -64,7 +67,9 @@ export default function App() {
       suggestion: 'Change "secret launch" to "upcoming feature release"',
       fixed: false
     }
-  ]);
+  ];
+
+  const [findings, setFindings] = useState(initialFindings);
 
   const runAgentSwarm = () => {
     setIsScanning(true);
@@ -111,6 +116,16 @@ export default function App() {
     findings.forEach((item) => applyAutoFix(item.id));
   };
 
+  // Full Reset Handler Function
+  const handleFullReset = () => {
+    setCampaignCopy(defaultText);
+    setFindings(initialFindings);
+    setAgentLogs([]);
+    setScanComplete(false);
+    setIsScanning(false);
+    setIsApproved(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       {/* Top Navigation */}
@@ -146,7 +161,7 @@ export default function App() {
 
           <div className="h-4 w-px bg-slate-800"></div>
 
-          {/* Interactive Role Toggle */}
+          {/* Role Toggle */}
           <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
             <button
               onClick={() => setUserRole('creator')}
@@ -215,6 +230,18 @@ export default function App() {
                 <div className="flex justify-between items-center text-slate-300"><span>Visual & Design Token</span><Check className="w-3 h-3 text-emerald-400" /></div>
                 <div className="flex justify-between items-center text-slate-300"><span>Accessibility Auditor</span><Check className="w-3 h-3 text-emerald-400" /></div>
                 <div className="flex justify-between items-center text-slate-300"><span>Confidentiality Leak</span><Check className="w-3 h-3 text-emerald-400" /></div>
+              </div>
+            </div>
+
+            {/* Live System Probes & Health Monitor */}
+            <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-3 space-y-2">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <Activity className="w-3 h-3 text-indigo-400" /> System Health Probes
+              </span>
+              <div className="space-y-1 text-[10px] font-mono">
+                <div className="flex justify-between text-slate-400"><span>API Health Probe:</span><span className="text-emerald-400">200 OK</span></div>
+                <div className="flex justify-between text-slate-400"><span>ChromaDB Sync:</span><span className="text-emerald-400">Connected</span></div>
+                <div className="flex justify-between text-slate-400"><span>Latency Probe:</span><span className="text-indigo-400">18ms</span></div>
               </div>
             </div>
           </div>
@@ -297,14 +324,12 @@ export default function App() {
 
                     <div className="flex justify-between items-center text-xs text-slate-400 pt-1">
                       <span>Target Channel: <strong className="text-slate-200">Enterprise Press Release</strong></span>
-                      {userRole === 'creator' && (
-                        <button 
-                          onClick={() => setCampaignCopy(defaultText)}
-                          className="text-indigo-400 hover:underline text-xs"
-                        >
-                          Reset Test Copy
-                        </button>
-                      )}
+                      <button 
+                        onClick={handleFullReset}
+                        className="text-indigo-400 hover:text-indigo-300 hover:underline text-xs font-medium cursor-pointer"
+                      >
+                        Reset Test Copy & State 🔄
+                      </button>
                     </div>
                   </div>
 
@@ -407,16 +432,18 @@ export default function App() {
 
           {activeTab === 'rules' && (
             <div className="max-w-4xl mx-auto bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
-              <h2 className="text-lg font-bold text-white">ChromaDB Guidelines Vector Storage</h2>
-              <p className="text-xs text-slate-400">Parsed policy chunks indexed for multi-tenant retrieval.</p>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Database className="w-5 h-5 text-indigo-400" /> ChromaDB Guidelines Vector Storage Index
+              </h2>
+              <p className="text-xs text-slate-400">Parsed policy chunks indexed for multi-tenant vector similarity search.</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                  <h4 className="text-xs font-bold text-indigo-400 uppercase mb-2">Tone Rules Index</h4>
+                  <h4 className="text-xs font-bold text-indigo-400 uppercase mb-2">Tone Rules Index Chunk #102</h4>
                   <p className="text-xs text-slate-300 leading-relaxed">Maintain authoritative, clear executive language. Avoid hyperboles like "secret launch" or unsubstantiated claims.</p>
                 </div>
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                  <h4 className="text-xs font-bold text-rose-400 uppercase mb-2">Confidentiality Rules</h4>
+                  <h4 className="text-xs font-bold text-rose-400 uppercase mb-2">Confidentiality Chunk #408</h4>
                   <p className="text-xs text-slate-300 leading-relaxed">Block internal domains (@acme.corp), unannounced project codenames, and unapproved pricing tiers.</p>
                 </div>
               </div>
@@ -425,7 +452,9 @@ export default function App() {
 
           {activeTab === 'analytics' && (
             <div className="max-w-4xl mx-auto bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
-              <h2 className="text-lg font-bold text-white">Governance Analytics</h2>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Server className="w-5 h-5 text-indigo-400" /> Enterprise Governance Analytics
+              </h2>
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center">
                   <span className="text-2xl font-extrabold text-emerald-400">94.2%</span>
