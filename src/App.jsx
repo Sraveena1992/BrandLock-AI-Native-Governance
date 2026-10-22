@@ -14,11 +14,9 @@ import {
   Terminal, 
   LayoutDashboard, 
   Award,
-  AlertTriangle,
   CheckCircle,
-  FileCode,
   Users,
-  Eye
+  CheckSquare
 } from 'lucide-react';
 
 export default function App() {
@@ -28,6 +26,7 @@ export default function App() {
   const [userRole, setUserRole] = useState('creator');
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showRoadmapModal, setShowRoadmapModal] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
 
   const defaultText = "Get ready for Acme's secret launch! We offer a 50% discount on all cloud services next week. No other provider comes close to our speed. Contact internal-project-alpha@acme.corp to pre-register today.";
   const [campaignCopy, setCampaignCopy] = useState(defaultText);
@@ -70,6 +69,7 @@ export default function App() {
   const runAgentSwarm = () => {
     setIsScanning(true);
     setScanComplete(false);
+    setIsApproved(false);
     setAgentLogs([]);
 
     const logSequence = [
@@ -146,16 +146,17 @@ export default function App() {
 
           <div className="h-4 w-px bg-slate-800"></div>
 
+          {/* Interactive Role Toggle */}
           <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
             <button
               onClick={() => setUserRole('creator')}
-              className={`px-3 py-1 rounded-md transition font-medium ${userRole === 'creator' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1 rounded-md transition font-semibold flex items-center gap-1 ${userRole === 'creator' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
             >
               Creator
             </button>
             <button
               onClick={() => setUserRole('manager')}
-              className={`px-3 py-1 rounded-md transition font-medium ${userRole === 'manager' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1 rounded-md transition font-semibold flex items-center gap-1 ${userRole === 'manager' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
             >
               Brand Lead
             </button>
@@ -231,11 +232,15 @@ export default function App() {
               {/* Workspace Banner */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl">
                 <div>
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    Pre-Publish Multi-Agent Auditor
-                  </h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-white">Pre-Publish Multi-Agent Auditor</h2>
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-900/50 text-indigo-300 border border-indigo-700/50 rounded uppercase">
+                      Role: {userRole === 'creator' ? 'Content Creator' : 'Brand Lead / Approver'}
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-400 mt-1">Review copy against Acme Corporate Brand Guidelines 2026 before deployment.</p>
                 </div>
+                
                 <button
                   onClick={runAgentSwarm}
                   disabled={isScanning}
@@ -255,6 +260,23 @@ export default function App() {
                 </button>
               </div>
 
+              {/* Role Context Bar for Brand Lead */}
+              {userRole === 'manager' && (
+                <div className="bg-gradient-to-r from-indigo-950/60 to-slate-900 p-4 rounded-xl border border-indigo-800/40 flex justify-between items-center text-xs">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-indigo-400" />
+                    <span><strong>Brand Lead Mode Active:</strong> Review creator fixes, inspect audit logs, and give final publish approval.</span>
+                  </div>
+                  <button 
+                    onClick={() => setIsApproved(!isApproved)}
+                    className={`px-4 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${isApproved ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+                  >
+                    <CheckSquare className="w-4 h-4" />
+                    {isApproved ? 'Approved for Publish ✅' : 'Approve Campaign Copy'}
+                  </button>
+                </div>
+              )}
+
               {/* Grid Area */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left: Input */}
@@ -269,17 +291,20 @@ export default function App() {
                       value={campaignCopy}
                       onChange={(e) => setCampaignCopy(e.target.value)}
                       rows={7}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition resize-none leading-relaxed font-sans"
+                      readOnly={userRole === 'manager'}
+                      className={`w-full bg-slate-950 border rounded-xl p-3.5 text-xs text-slate-200 focus:outline-none transition resize-none leading-relaxed font-sans ${userRole === 'manager' ? 'border-indigo-800/40 opacity-90' : 'border-slate-800 focus:border-indigo-500'}`}
                     ></textarea>
 
                     <div className="flex justify-between items-center text-xs text-slate-400 pt-1">
                       <span>Target Channel: <strong className="text-slate-200">Enterprise Press Release</strong></span>
-                      <button 
-                        onClick={() => setCampaignCopy(defaultText)}
-                        className="text-indigo-400 hover:underline text-xs"
-                      >
-                        Reset Test Copy
-                      </button>
+                      {userRole === 'creator' && (
+                        <button 
+                          onClick={() => setCampaignCopy(defaultText)}
+                          className="text-indigo-400 hover:underline text-xs"
+                        >
+                          Reset Test Copy
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -436,21 +461,11 @@ export default function App() {
             
             <div className="space-y-3 text-xs text-slate-300 leading-relaxed">
               <p>
-                <strong>BrandLock</strong> is an AI-native brand governance platform built for the TechCircuit / Inkloom AI Hackathon (Solo Builder: Raveena Sharma).
+                <strong>BrandLock</strong> is an AI-native brand governance platform built for TechCircuit / Inkloom AI.
               </p>
               <p>
-                Unlike generic grammar checkers, BrandLock uses an autonomous <strong>Multi-Agent AI Swarm Engine</strong> to audit content across 6 critical compliance vectors: Tone, Terminology, Claim Verification, Visual Assets, Accessibility, and Data Leaks.
+                Uses an autonomous <strong>Multi-Agent AI Swarm Engine</strong> to audit content across 6 critical vectors: Tone, Terminology, Claim Verification, Visual Assets, Accessibility, and Data Leaks.
               </p>
-
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-                <span className="font-bold text-indigo-400 block">Key Architecture Highlights:</span>
-                <ul className="list-disc list-inside space-y-1 text-slate-400">
-                  <td>Autonomous parallel agent orchestration</td>
-                  <td>Explainable citations mapped to ChromaDB chunks</td>
-                  <td>Context-aware 1-Click Auto-Fix Engine</td>
-                  <td>Role-based collaborative review workflows</td>
-                </ul>
-              </div>
             </div>
 
             <button onClick={() => setShowAboutModal(false)} className="w-full bg-indigo-600 text-white py-2.5 rounded-xl text-xs font-semibold hover:bg-indigo-500 transition">
