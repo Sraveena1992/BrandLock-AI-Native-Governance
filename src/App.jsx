@@ -40,7 +40,7 @@ export default function App() {
 
   const [agentLogs, setAgentLogs] = useState([]);
   const [findings, setFindings] = useState([]);
-  const [riskScore, setRiskScore] = useState(85);
+  const [riskScore, setRiskScore] = useState(0);
 
   // Dynamic Rule Engine Execution
   const analyzeTextDynamically = (text) => {
