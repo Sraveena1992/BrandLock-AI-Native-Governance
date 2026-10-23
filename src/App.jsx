@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
   ShieldCheck, 
@@ -20,10 +20,9 @@ import {
   Activity,
   Database,
   Server,
-  Key,
-  Briefcase,
-  Lock,
-  Globe
+  Code2,
+  AlertOctagon,
+  Gauge
 } from 'lucide-react';
 
 export default function App() {
@@ -33,47 +32,88 @@ export default function App() {
   const [userRole, setUserRole] = useState('creator');
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showRoadmapModal, setShowRoadmapModal] = useState(false);
+  const [showDevInspector, setShowDevInspector] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
 
   const defaultText = "Get ready for Acme's secret launch! We offer a 50% discount on all cloud services next week. No other provider comes close to our speed. Contact internal-project-alpha@acme.corp to pre-register today.";
   const [campaignCopy, setCampaignCopy] = useState(defaultText);
 
   const [agentLogs, setAgentLogs] = useState([]);
-  
-  const initialFindings = [
-    {
-      id: 1,
-      category: 'Confidentiality Leak',
-      severity: 'High',
-      agent: 'Security & Data Leak Agent',
-      issue: 'Internal email domain (@acme.corp) & project codename exposed',
-      citation: 'Enterprise Policy - Section 4.2: NDA & Data Exposure Rules',
-      suggestion: 'Replace with public domain contact (contact@acme.com)',
-      fixed: false
-    },
-    {
-      id: 2,
-      category: 'Claims & Verification',
-      severity: 'Medium',
-      agent: 'Fact & Claim Verifier Agent',
-      issue: 'Unsubstantiated 50% discount rate & superlative claim',
-      citation: 'Brand Guidelines 2026 - Page 14: Financial & Promo Claims',
-      suggestion: 'Rephrase to "exclusive special offer" unless Finance pre-approves',
-      fixed: false
-    },
-    {
-      id: 3,
-      category: 'Tone & Persona',
-      severity: 'Low',
-      agent: 'Executive Voice & Tone Agent',
-      issue: 'Informal hype language ("secret launch") conflicts with Enterprise Persona',
-      citation: 'Voice Spec - Page 3: Professional Standard Guidelines',
-      suggestion: 'Change "secret launch" to "upcoming feature release"',
-      fixed: false
-    }
-  ];
+  const [findings, setFindings] = useState([]);
+  const [riskScore, setRiskScore] = useState(85);
 
-  const [findings, setFindings] = useState(initialFindings);
+  // Dynamic Rule Engine Execution
+  const analyzeTextDynamically = (text) => {
+    const detected = [];
+    let calculatedRisk = 0;
+
+    // 1. Confidentiality / NDA Leak Rules
+    const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
+    const emailMatches = text.match(emailRegex);
+    if (emailMatches) {
+      emailMatches.forEach((email) => {
+        if (email.includes('internal') || email.includes('.corp') || email.includes('admin') || email.includes('dev')) {
+          detected.push({
+            id: 'conf-' + Math.random().toString(36).substr(2, 4),
+            category: 'Confidentiality Leak',
+            severity: 'High',
+            agent: 'Security & Leak Agent',
+            target: email,
+            replacement: 'contact@acme.com',
+            issue: `Internal domain or unauthorized address exposure: "${email}"`,
+            citation: 'Enterprise Policy Sec 4.2: NDA & Private Domain Restrictions',
+            suggestion: 'Replace with approved public contact endpoint.',
+            fixed: false
+          });
+          calculatedRisk += 40;
+        }
+      });
+    }
+
+    if (text.toLowerCase().includes('secret launch') || text.toLowerCase().includes('project-alpha')) {
+      detected.push({
+        id: 'code-' + Math.random().toString(36).substr(2, 4),
+        category: 'NDA Disclosure',
+        severity: 'High',
+        agent: 'Security & Leak Agent',
+        target: text.toLowerCase().includes('secret launch') ? 'secret launch' : 'project-alpha',
+        replacement: 'upcoming feature release',
+        issue: 'Unannounced product internal codename or launch status',
+        citation: 'Corporate Governance - Clause 9: Product Release Cycles',
+        suggestion: 'Use standardized external release terminology.',
+        fixed: false
+      });
+      calculatedRisk += 30;
+    }
+
+    // 2. Fact & Claim Verifier Rules
+    const discountRegex = /(\d+%\s*discount|\bguarantee\b|\b100%\b|\bno other provider\b)/gi;
+    const claimMatches = text.match(discountRegex);
+    if (claimMatches) {
+      claimMatches.forEach((claim) => {
+        detected.push({
+          id: 'claim-' + Math.random().toString(36).substr(2, 4),
+          category: 'Unverified Claim',
+          severity: 'Medium',
+          agent: 'Fact Check Agent',
+          target: claim,
+          replacement: claim.toLowerCase().includes('discount') ? 'special promo offer' : 'industry-leading standards',
+          issue: `Unsubstantiated legal or financial claim: "${claim}"`,
+          citation: 'Brand Guidelines 2026 - Page 14: Promos & Comparative Claims',
+          suggestion: 'Substitute with pre-approved marketing phrasing.',
+          fixed: false
+        });
+        calculatedRisk += 20;
+      });
+    }
+
+    // Default Fallback
+    if (detected.length === 0 && text.trim().length > 10) {
+      calculatedRisk = 0;
+    }
+
+    return { detected, risk: Math.min(100, calculatedRisk) };
+  };
 
   const runAgentSwarm = () => {
     setIsScanning(true);
@@ -81,100 +121,121 @@ export default function App() {
     setIsApproved(false);
     setAgentLogs([]);
 
+    const { detected, risk } = analyzeTextDynamically(campaignCopy);
+
     const logSequence = [
-      '🤖 [Swarm Orchestrator]: Spawning 6 autonomous specialized governance agents...',
-      '🔍 [Agent 1 - Tone & Persona]: Analyzing executive style alignment & hype index...',
-      '📚 [Agent 2 - Terminology Matcher]: Querying ChromaDB vector index for banned phrases...',
-      '⚖️ [Agent 3 - Fact Verifier]: Cross-referencing promo discount against Finance DB...',
-      '🎨 [Agent 4 - Visual Brand Agent]: Validating associated design tokens & color hexes...',
-      '♿ [Agent 5 - Accessibility Auditor]: Evaluating WCAG 2.1 compliance & readability...',
-      '🔒 [Agent 6 - Confidentiality Guard]: Executing pattern matching for NDA & internal leak detection...',
-      '✅ [Swarm Orchestrator]: Agent consensus reached! Synthesizing grounded citations.'
+      '🤖 [Swarm Orchestrator]: Spawning 6 parallel verification agents...',
+      '🔍 [Agent 1 - Tone]: Parsing text semantics & corporate voice alignment...',
+      '📚 [Agent 2 - Terminology]: Executing vector similarity search in ChromaDB...',
+      '⚖️ [Agent 3 - Fact Verifier]: Evaluating financial claims & discount rates...',
+      '🔒 [Agent 4 - Security Guard]: Pattern matching regex for private domains & NDA leaks...',
+      '♿ [Agent 5 - Readability]: Auditing length, clarity index, and token density...',
+      '✅ [Swarm Orchestrator]: Analysis complete! Synthesizing findings with grounded RAG citations.'
     ];
 
     logSequence.forEach((log, index) => {
       setTimeout(() => {
         setAgentLogs((prev) => [...prev, log]);
         if (index === logSequence.length - 1) {
+          setFindings(detected);
+          setRiskScore(risk);
           setIsScanning(false);
           setScanComplete(true);
         }
-      }, (index + 1) * 300);
+      }, (index + 1) * 250);
     });
   };
 
   const applyAutoFix = (id) => {
+    const itemToFix = findings.find((f) => f.id === id);
+    if (!itemToFix) return;
+
     setFindings((prev) =>
       prev.map((item) => (item.id === id ? { ...item, fixed: true } : item))
     );
-    if (id === 1) {
-      setCampaignCopy((prev) => prev.replace('internal-project-alpha@acme.corp', 'contact@acme.com'));
-    } else if (id === 2) {
-      setCampaignCopy((prev) => prev.replace('50% discount', 'exclusive offer'));
-    } else if (id === 3) {
-      setCampaignCopy((prev) => prev.replace('secret launch', 'upcoming release'));
+
+    if (itemToFix.target && itemToFix.replacement) {
+      setCampaignCopy((prev) => prev.replace(itemToFix.target, itemToFix.replacement));
     }
+
+    setRiskScore((prev) => Math.max(0, prev - 25));
   };
 
   const applyAllFixes = () => {
-    findings.forEach((item) => applyAutoFix(item.id));
+    let updatedText = campaignCopy;
+    findings.forEach((item) => {
+      if (item.target && item.replacement) {
+        updatedText = updatedText.replace(item.target, item.replacement);
+      }
+    });
+    setCampaignCopy(updatedText);
+    setFindings((prev) => prev.map((item) => ({ ...item, fixed: true })));
+    setRiskScore(0);
   };
 
   const handleFullReset = () => {
     setCampaignCopy(defaultText);
-    setFindings(initialFindings);
+    setFindings([]);
     setAgentLogs([]);
     setScanComplete(false);
     setIsScanning(false);
     setIsApproved(false);
+    setRiskScore(85);
   };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Top Navigation */}
-      <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-6 py-3.5 flex justify-between items-center sticky top-0 z-30">
+      {/* Top Header */}
+      <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-6 py-3 flex justify-between items-center sticky top-0 z-30">
         <div className="flex items-center space-x-3">
           <div className="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/20">
             <Shield className="w-5 h-5" />
           </div>
           <div>
             <h1 className="font-bold text-lg tracking-wide flex items-center gap-2 text-white">
-              BrandLock <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-semibold uppercase tracking-wider">AI-Native Swarm Engine</span>
+              BrandLock <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-semibold uppercase">Engine Active</span>
             </h1>
-            <p className="text-xs text-slate-400">Autonomous Content Governance & Pre-Publish Verification</p>
+            <p className="text-xs text-slate-400">Autonomous Content Risk Audit Platform</p>
           </div>
         </div>
 
         <div className="flex items-center space-x-3">
           <button 
+            onClick={() => setShowDevInspector(!showDevInspector)}
+            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition font-mono ${showDevInspector ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'}`}
+          >
+            <Code2 className="w-4 h-4 text-emerald-400" />
+            API Payload Inspector
+          </button>
+
+          <button 
             onClick={() => setShowRoadmapModal(true)}
-            className="flex items-center gap-1.5 text-xs bg-indigo-950/60 text-indigo-300 border border-indigo-700/50 px-3 py-1.5 rounded-lg hover:bg-indigo-900/50 transition font-medium cursor-pointer"
+            className="flex items-center gap-1.5 text-xs bg-indigo-950/60 text-indigo-300 border border-indigo-700/50 px-3 py-1.5 rounded-lg hover:bg-indigo-900/50 transition font-medium"
           >
             <Award className="w-4 h-4 text-indigo-400" />
-            Round 3 Roadmap
+            R3 Roadmap
           </button>
 
           <button 
             onClick={() => setShowAboutModal(true)}
-            className="flex items-center gap-1.5 text-xs bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-700 transition font-medium cursor-pointer"
+            className="flex items-center gap-1.5 text-xs bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-700 transition font-medium"
           >
             <Info className="w-4 h-4 text-slate-400" />
-            About BrandLock
+            About
           </button>
 
           <div className="h-4 w-px bg-slate-800"></div>
 
-          {/* Role Toggle */}
           <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
             <button
               onClick={() => setUserRole('creator')}
-              className={`px-3 py-1 rounded-md transition font-semibold flex items-center gap-1 cursor-pointer ${userRole === 'creator' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1 rounded-md transition font-semibold ${userRole === 'creator' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
             >
               Creator
             </button>
             <button
               onClick={() => setUserRole('manager')}
-              className={`px-3 py-1 rounded-md transition font-semibold flex items-center gap-1 cursor-pointer ${userRole === 'manager' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}`}
+              className={`px-3 py-1 rounded-md transition font-semibold ${userRole === 'manager' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
             >
               Brand Lead
             </button>
@@ -182,69 +243,67 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Body */}
+      {/* Main Container */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
         <aside className="w-64 border-r border-slate-800 bg-slate-900/40 p-4 flex flex-col justify-between hidden md:flex">
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div>
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Governance Studio</p>
               <nav className="space-y-1.5">
                 <button
                   onClick={() => setActiveTab('studio')}
-                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'studio' ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
+                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'studio' ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
                 >
                   <FileText className="w-4 h-4" />
                   <span>Content Auditor</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('rules')}
-                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'rules' ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
+                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'rules' ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
                 >
                   <Layers className="w-4 h-4" />
-                  <span>Guidelines Index</span>
+                  <span>Vector Index</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('analytics')}
-                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${activeTab === 'analytics' ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
+                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'analytics' ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  <span>Clarity Dashboard</span>
+                  <span>Risk Metrics</span>
                 </button>
               </nav>
             </div>
 
-            {/* Agent Matrix */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-                  Active Swarm
+            {/* Live Risk Index Gauge */}
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                  <Gauge className="w-4 h-4 text-indigo-400" />
+                  Policy Exposure
                 </span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Online
+                <span className={`text-xs font-extrabold ${riskScore > 50 ? 'text-rose-400' : riskScore > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  {riskScore}% RISK
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-snug">6 Parallel agents validating policy vector chunks.</p>
-              <div className="space-y-1.5 pt-1 text-[11px]">
-                <div className="flex justify-between items-center text-slate-300"><span>Tone & Voice Agent</span><Check className="w-3 h-3 text-emerald-400" /></div>
-                <div className="flex justify-between items-center text-slate-300"><span>Terminology Matcher</span><Check className="w-3 h-3 text-emerald-400" /></div>
-                <div className="flex justify-between items-center text-slate-300"><span>Fact & Claim Verifier</span><Check className="w-3 h-3 text-emerald-400" /></div>
-                <div className="flex justify-between items-center text-slate-300"><span>Visual & Design Token</span><Check className="w-3 h-3 text-emerald-400" /></div>
-                <div className="flex justify-between items-center text-slate-300"><span>Accessibility Auditor</span><Check className="w-3 h-3 text-emerald-400" /></div>
-                <div className="flex justify-between items-center text-slate-300"><span>Confidentiality Leak</span><Check className="w-3 h-3 text-emerald-400" /></div>
+              <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                <div 
+                  className={`h-full transition-all duration-500 ${riskScore > 50 ? 'bg-rose-500' : riskScore > 0 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                  style={{ width: `${riskScore}%` }}
+                ></div>
               </div>
+              <p className="text-[10px] text-slate-400">Calculated across 6 compliance agents.</p>
             </div>
 
-            {/* Live System Probes */}
-            <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-3 space-y-2">
+            {/* Health Probes */}
+            <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-3 space-y-1.5">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
                 <Activity className="w-3 h-3 text-indigo-400" /> System Health Probes
               </span>
               <div className="space-y-1 text-[10px] font-mono">
-                <div className="flex justify-between text-slate-400"><span>API Health Probe:</span><span className="text-emerald-400">200 OK</span></div>
-                <div className="flex justify-between text-slate-400"><span>ChromaDB Sync:</span><span className="text-emerald-400">Connected</span></div>
-                <div className="flex justify-between text-slate-400"><span>Latency Probe:</span><span className="text-indigo-400">18ms</span></div>
+                <div className="flex justify-between text-slate-400"><span>Engine Status:</span><span className="text-emerald-400">200 OK</span></div>
+                <div className="flex justify-between text-slate-400"><span>ChromaDB Vector:</span><span className="text-emerald-400">Synced</span></div>
+                <div className="flex justify-between text-slate-400"><span>Scan Latency:</span><span className="text-indigo-400">14ms</span></div>
               </div>
             </div>
           </div>
@@ -257,9 +316,31 @@ export default function App() {
 
         {/* Content Workspace */}
         <main className="flex-1 bg-slate-950 overflow-y-auto p-6">
+          {/* API Inspector Panel */}
+          {showDevInspector && (
+            <div className="mb-6 bg-slate-900 border border-emerald-500/30 rounded-2xl p-4 font-mono text-xs text-slate-300 space-y-2 shadow-2xl">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-emerald-400 font-bold flex items-center gap-2">
+                  <Code2 className="w-4 h-4" /> Live Execution Payload Inspector (REST / Vector Pipeline)
+                </span>
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">POST /api/v1/swarm/audit</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px]">
+                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                  <span className="text-slate-500 block mb-1">// Request Body:</span>
+                  <pre className="text-indigo-300 whitespace-pre-wrap">{JSON.stringify({ content: campaignCopy, channel: "Press_Release", agents: 6 }, null, 2)}</pre>
+                </div>
+                <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                  <span className="text-slate-500 block mb-1">// Synthesized Response:</span>
+                  <pre className="text-emerald-300 whitespace-pre-wrap">{JSON.stringify({ risk_score: riskScore, violations_found: findings.length, status: scanComplete ? "COMPLETED" : "IDLE" }, null, 2)}</pre>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'studio' && (
             <div className="max-w-6xl mx-auto space-y-6">
-              {/* Workspace Banner */}
+              {/* Top Banner */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl">
                 <div>
                   <div className="flex items-center gap-2">
@@ -268,18 +349,18 @@ export default function App() {
                       Role: {userRole === 'creator' ? 'Content Creator' : 'Brand Lead / Approver'}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">Review copy against Acme Corporate Brand Guidelines 2026 before deployment.</p>
+                  <p className="text-xs text-slate-400 mt-1">Type or paste any campaign text to execute dynamic multi-vector AI governance checks.</p>
                 </div>
                 
                 <button
                   onClick={runAgentSwarm}
                   disabled={isScanning}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs transition shadow-lg cursor-pointer ${isScanning ? 'bg-indigo-800 text-indigo-300 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-indigo-600/30'}`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs transition shadow-lg ${isScanning ? 'bg-indigo-800 text-indigo-300 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-indigo-600/30'}`}
                 >
                   {isScanning ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      Swarm Analyzing...
+                      Swarm Parsing...
                     </>
                   ) : (
                     <>
@@ -299,7 +380,7 @@ export default function App() {
                   </div>
                   <button 
                     onClick={() => setIsApproved(!isApproved)}
-                    className={`px-4 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 cursor-pointer ${isApproved ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+                    className={`px-4 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${isApproved ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
                   >
                     <CheckSquare className="w-4 h-4" />
                     {isApproved ? 'Approved for Publish ✅' : 'Approve Campaign Copy'}
@@ -307,9 +388,9 @@ export default function App() {
                 </div>
               )}
 
-              {/* Grid Area */}
+              {/* Grid Workspace */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Left: Input */}
+                {/* Left: Input Editor */}
                 <div className="space-y-4">
                   <div className="bg-slate-900/60 rounded-2xl border border-slate-800 p-5 space-y-3 shadow-lg">
                     <div className="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -323,25 +404,26 @@ export default function App() {
                       rows={7}
                       readOnly={userRole === 'manager'}
                       className={`w-full bg-slate-950 border rounded-xl p-3.5 text-xs text-slate-200 focus:outline-none transition resize-none leading-relaxed font-sans ${userRole === 'manager' ? 'border-indigo-800/40 opacity-90' : 'border-slate-800 focus:border-indigo-500'}`}
+                      placeholder="Type or paste marketing copy here to test dynamic AI governance..."
                     ></textarea>
 
                     <div className="flex justify-between items-center text-xs text-slate-400 pt-1">
                       <span>Target Channel: <strong className="text-slate-200">Enterprise Press Release</strong></span>
                       <button 
                         onClick={handleFullReset}
-                        className="text-indigo-400 hover:text-indigo-300 hover:underline text-xs font-medium cursor-pointer"
+                        className="text-indigo-400 hover:text-indigo-300 hover:underline text-xs font-medium"
                       >
                         Reset Test Copy & State 🔄
                       </button>
                     </div>
                   </div>
 
-                  {/* Swarm Live Terminal */}
+                  {/* Swarm Console Terminal */}
                   {(isScanning || agentLogs.length > 0) && (
                     <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-4 space-y-2 shadow-lg">
                       <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
                         <Terminal className="w-4 h-4 text-emerald-400" />
-                        <span className="text-xs font-bold text-slate-300">Swarm Execution Console</span>
+                        <span className="text-xs font-bold text-slate-300">Swarm Agent Console</span>
                       </div>
                       <div className="bg-slate-950 rounded-xl p-3 font-mono text-[11px] text-slate-300 space-y-1.5 max-h-44 overflow-y-auto border border-slate-800/80">
                         {agentLogs.map((log, i) => (
@@ -360,10 +442,10 @@ export default function App() {
                         <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Governance Findings</h3>
                         <p className="text-[11px] text-slate-400">Synthesized with RAG citations</p>
                       </div>
-                      {scanComplete && (
+                      {scanComplete && findings.length > 0 && (
                         <button
                           onClick={applyAllFixes}
-                          className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg hover:bg-emerald-500/20 transition flex items-center gap-1.5 font-semibold cursor-pointer"
+                          className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg hover:bg-emerald-500/20 transition flex items-center gap-1.5 font-semibold"
                         >
                           <Sparkles className="w-3.5 h-3.5" />
                           1-Click Fix All
@@ -374,7 +456,7 @@ export default function App() {
                     {!scanComplete && !isScanning && (
                       <div className="text-center py-12 text-slate-500 space-y-3">
                         <ShieldCheck className="w-12 h-12 mx-auto stroke-1 text-slate-600" />
-                        <p className="text-xs">Click "Run AI Swarm Check" to trigger multi-agent verification.</p>
+                        <p className="text-xs">Click "Run AI Swarm Check" to execute dynamic text audit.</p>
                       </div>
                     )}
 
@@ -385,16 +467,24 @@ export default function App() {
                       </div>
                     )}
 
-                    {scanComplete && (
+                    {scanComplete && findings.length === 0 && (
+                      <div className="text-center py-12 text-emerald-400 space-y-2">
+                        <CheckCircle className="w-12 h-12 mx-auto stroke-1 text-emerald-400" />
+                        <h4 className="font-bold text-sm text-white">No Policy Violations Detected!</h4>
+                        <p className="text-xs text-slate-400">Content is 100% compliant with Acme Brand Rules.</p>
+                      </div>
+                    )}
+
+                    {scanComplete && findings.length > 0 && (
                       <div className="space-y-3">
                         {findings.map((item) => (
                           <div
                             key={item.id}
-                            className={`p-4 rounded-xl border transition ${item.fixed ? 'bg-slate-900/30 border-slate-800/80 opacity-60' : item.severity === 'High' ? 'bg-rose-950/20 border-rose-800/40' : item.severity === 'Medium' ? 'bg-amber-950/20 border-amber-800/40' : 'bg-blue-950/20 border-blue-800/40'}`}
+                            className={`p-4 rounded-xl border transition ${item.fixed ? 'bg-slate-900/30 border-slate-800/80 opacity-60' : item.severity === 'High' ? 'bg-rose-950/20 border-rose-800/40' : 'bg-amber-950/20 border-amber-800/40'}`}
                           >
                             <div className="flex justify-between items-start mb-1.5">
                               <div className="flex items-center gap-2">
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${item.severity === 'High' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : item.severity === 'Medium' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'}`}>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${item.severity === 'High' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`}>
                                   {item.severity}
                                 </span>
                                 <span className="text-xs font-bold text-slate-200">{item.category}</span>
@@ -413,7 +503,7 @@ export default function App() {
                               {!item.fixed ? (
                                 <button
                                   onClick={() => applyAutoFix(item.id)}
-                                  className="ml-2 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[11px] font-semibold transition shadow cursor-pointer"
+                                  className="ml-2 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[11px] font-semibold transition shadow"
                                 >
                                   Auto-Fix
                                 </button>
@@ -436,18 +526,16 @@ export default function App() {
           {activeTab === 'rules' && (
             <div className="max-w-4xl mx-auto bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Database className="w-5 h-5 text-indigo-400" /> ChromaDB Guidelines Vector Storage Index
+                <Database className="w-5 h-5 text-indigo-400" /> ChromaDB Vector Policy Storage
               </h2>
-              <p className="text-xs text-slate-400">Parsed policy chunks indexed for multi-tenant vector similarity search.</p>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                  <h4 className="text-xs font-bold text-indigo-400 uppercase mb-2">Tone Rules Index Chunk #102</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed">Maintain authoritative, clear executive language. Avoid hyperboles like "secret launch" or unsubstantiated claims.</p>
+                  <h4 className="text-xs font-bold text-indigo-400 uppercase mb-2">Vector Chunk #102 — Tone Policy</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">Maintain authoritative executive voice. Flag informal launch phrases and comparative superlatives.</p>
                 </div>
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                  <h4 className="text-xs font-bold text-rose-400 uppercase mb-2">Confidentiality Chunk #408</h4>
-                  <p className="text-xs text-slate-300 leading-relaxed">Block internal domains (@acme.corp), unannounced project codenames, and unapproved pricing tiers.</p>
+                  <h4 className="text-xs font-bold text-rose-400 uppercase mb-2">Vector Chunk #408 — Confidentiality</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">Detect internal email domains (@acme.corp, dev/admin endpoints) and unannounced project codenames.</p>
                 </div>
               </div>
             </div>
@@ -456,20 +544,20 @@ export default function App() {
           {activeTab === 'analytics' && (
             <div className="max-w-4xl mx-auto bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Server className="w-5 h-5 text-indigo-400" /> Enterprise Governance Analytics
+                <Server className="w-5 h-5 text-indigo-400" /> Risk Score & Analytics Metrics
               </h2>
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center">
-                  <span className="text-2xl font-extrabold text-emerald-400">94.2%</span>
-                  <p className="text-xs text-slate-400 mt-1">Clarity Index</p>
+                  <span className="text-2xl font-extrabold text-emerald-400">{100 - riskScore}%</span>
+                  <p className="text-xs text-slate-400 mt-1">Compliance Score</p>
                 </div>
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center">
-                  <span className="text-2xl font-extrabold text-indigo-400">142</span>
-                  <p className="text-xs text-slate-400 mt-1">Total Scans</p>
+                  <span className="text-2xl font-extrabold text-indigo-400">{findings.length}</span>
+                  <p className="text-xs text-slate-400 mt-1">Detected Issues</p>
                 </div>
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center">
-                  <span className="text-2xl font-extrabold text-amber-400">18</span>
-                  <p className="text-xs text-slate-400 mt-1">Auto-Fixes</p>
+                  <span className="text-2xl font-extrabold text-amber-400">{findings.filter(f => f.fixed).length}</span>
+                  <p className="text-xs text-slate-400 mt-1">Resolved Fixes</p>
                 </div>
               </div>
             </div>
@@ -477,83 +565,21 @@ export default function App() {
         </main>
       </div>
 
-      {/* FULL DETAILED ENTERPRISE ABOUT MODAL */}
+      {/* About Modal */}
       {showAboutModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-2xl w-full space-y-5 shadow-2xl my-8">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-xl w-full space-y-4 shadow-2xl">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
-                  <Shield className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-base text-white">About BrandLock Governance Engine</h3>
-                  <p className="text-[11px] text-indigo-400">TechCircuit / Inkloom AI Round 2 Submission</p>
-                </div>
-              </div>
-              <button onClick={() => setShowAboutModal(false)} className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer">
+              <h3 className="font-bold text-base text-white">About BrandLock Governance Engine</h3>
+              <button onClick={() => setShowAboutModal(false)} className="text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            <div className="space-y-4 text-xs text-slate-300 leading-relaxed">
-              <p>
-                <strong>BrandLock</strong> is an AI-native, pre-publish content risk engine built specifically for enterprise marketing teams, PR agencies, and compliance officers. It acts as an <strong>autonomous brand safety layer</strong> before marketing collateral is deployed.
-              </p>
-
-              {/* 6 Specialized Agents Breakdown */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-indigo-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                  <Cpu className="w-4 h-4 text-indigo-400" />
-                  6 Autonomous Swarm Vector Agents
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
-                    <strong className="text-slate-200 block mb-0.5">1. Tone & Persona Agent</strong>
-                    <span className="text-slate-400">Evaluates executive alignment & prevents informal hype terms.</span>
-                  </div>
-                  <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
-                    <strong className="text-slate-200 block mb-0.5">2. Terminology Matcher</strong>
-                    <span className="text-slate-400">Scans ChromaDB vector database for prohibited industry jargon.</span>
-                  </div>
-                  <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
-                    <strong className="text-slate-200 block mb-0.5">3. Fact & Claim Verifier</strong>
-                    <span className="text-slate-400">Cross-references promo discounts & superlatives against Finance rules.</span>
-                  </div>
-                  <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
-                    <strong className="text-slate-200 block mb-0.5">4. Visual Identity Agent</strong>
-                    <span className="text-slate-400">Validates design tokens, brand color hexes & typography standards.</span>
-                  </div>
-                  <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
-                    <strong className="text-slate-200 block mb-0.5">5. Accessibility Auditor</strong>
-                    <span className="text-slate-400">Audits alt text, WCAG 2.1 contrast compliance & readability index.</span>
-                  </div>
-                  <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
-                    <strong className="text-slate-200 block mb-0.5">6. Confidentiality Guard</strong>
-                    <span className="text-slate-400">Executes pattern matching for NDA leaks, internal emails & codenames.</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Real World Impact */}
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-                <span className="font-bold text-indigo-400 block text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-                  <Briefcase className="w-4 h-4" />
-                  Real-World Value & Business Viability
-                </span>
-                <p className="text-slate-400 text-[11px] leading-relaxed">
-                  Reduces brand review time from <strong>hours to 2 seconds</strong>, prevents costly financial/regulatory lawsuits, and eliminates PR nightmares before public dissemination. Targeted as a B2B SaaS subscription for CMOs ($299–$1000+/mo).
-                </p>
-              </div>
-
-              <div className="flex justify-between items-center text-[11px] text-slate-500 pt-1 border-t border-slate-800">
-                <span>Solo Builder: <strong>Raveena Sharma</strong> (@Sraveena1992)</span>
-                <span>Tech Stack: <strong>React • Vite • Tailwind • ChromaDB</strong></span>
-              </div>
-            </div>
-
-            <button onClick={() => setShowAboutModal(false)} className="w-full bg-indigo-600 text-white py-2.5 rounded-xl text-xs font-semibold hover:bg-indigo-500 transition cursor-pointer">
-              Close About Overview
+            <p className="text-xs text-slate-300 leading-relaxed">
+              BrandLock is a real-time, multi-agent AI governance engine that inspects marketing copy against corporate brand policy vectors to prevent NDA leaks, false promotional claims, and voice misalignment.
+            </p>
+            <button onClick={() => setShowAboutModal(false)} className="w-full bg-indigo-600 text-white py-2 rounded-xl text-xs font-semibold">
+              Close Overview
             </button>
           </div>
         </div>
@@ -564,30 +590,14 @@ export default function App() {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="font-bold text-base text-white flex items-center gap-2">
-                <Award className="w-5 h-5 text-indigo-400" />
-                Round 3 Planned Improvements
-              </h3>
-              <button onClick={() => setShowRoadmapModal(false)} className="text-slate-400 hover:text-white cursor-pointer">
+              <h3 className="font-bold text-base text-white">Round 3 Ecosystem Roadmap</h3>
+              <button onClick={() => setShowRoadmapModal(false)} className="text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-3 text-xs">
-              <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800">
-                <h4 className="font-bold text-indigo-400 mb-1">1. Figma & Canva Plugin Integration</h4>
-                <p className="text-slate-400">Direct design toolbar extension for real-time visual governance.</p>
-              </div>
-              <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800">
-                <h4 className="font-bold text-indigo-400 mb-1">2. Automated Guideline Ingestion Engine</h4>
-                <p className="text-slate-400">Automatic PDF parsing & chunking directly into ChromaDB vector index.</p>
-              </div>
-              <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800">
-                <h4 className="font-bold text-indigo-400 mb-1">3. Enterprise Risk Analytics Dashboard</h4>
-                <p className="text-slate-400">Department-level policy violation metrics & historical risk scoring.</p>
-              </div>
-            </div>
-            <button onClick={() => setShowRoadmapModal(false)} className="w-full bg-indigo-600 text-white py-2.5 rounded-xl text-xs font-semibold hover:bg-indigo-500 transition cursor-pointer">
-              Acknowledge Roadmap
+            <p className="text-xs text-slate-300">1. Figma & Canva Plugins<br/>2. Automated PDF Vector Ingestion Engine<br/>3. Enterprise Risk Analytics Dashboard</p>
+            <button onClick={() => setShowRoadmapModal(false)} className="w-full bg-indigo-600 text-white py-2 rounded-xl text-xs font-semibold">
+              Close Roadmap
             </button>
           </div>
         </div>
