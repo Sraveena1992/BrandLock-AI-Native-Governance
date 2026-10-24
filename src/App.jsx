@@ -124,13 +124,13 @@ export default function App() {
     const { detected, risk } = analyzeTextDynamically(campaignCopy);
 
     const logSequence = [
-      '🤖 [Swarm Orchestrator]: Spawning 6 parallel verification agents...',
-      '🔍 [Agent 1 - Tone]: Parsing text semantics & corporate voice alignment...',
-      '📚 [Agent 2 - Terminology]: Executing vector similarity search in ChromaDB...',
-      '⚖️ [Agent 3 - Fact Verifier]: Evaluating financial claims & discount rates...',
-      '🔒 [Agent 4 - Security Guard]: Pattern matching regex for private domains & NDA leaks...',
-      '♿ [Agent 5 - Readability]: Auditing length, clarity index, and token density...',
-      '✅ [Swarm Orchestrator]: Analysis complete! Synthesizing findings with grounded RAG citations.'
+      '🤖 [Swarm Orchestrator]: [Policy Engine]: Starting browser-local rule checks...',
+      '🔍 [Check 1 - Confidentiality]: Inspecting internal addresses and selected disclosure phrases...',
+      '📚 [Check 2 - Claims]: Inspecting selected promotional and comparative claims...',
+      '⚖️ [Synthesis]: Grouping matched rules into review findings...',
+      '🔒 [Rule Check]: Applying local pattern matching for private domains and selected codenames...',
+      '♿ [Scope]: Tone, visual identity and full accessibility checks are not included in this build.',
+      '✅ [Policy Engine]: Local audit completed. Review each finding before making a decision.'
     ];
 
     logSequence.forEach((log, index) => {
@@ -158,7 +158,8 @@ export default function App() {
       setCampaignCopy((prev) => prev.replace(itemToFix.target, itemToFix.replacement));
     }
 
-    setRiskScore((prev) => Math.max(0, prev - 25));
+    const remaining = findings.filter((item) => item.id !== id && !item.fixed);
+    setRiskScore(Math.min(100, remaining.reduce((total, item) => total + (item.severity === 'High' ? 40 : 20), 0)));
   };
 
   const applyAllFixes = () => {
@@ -180,7 +181,7 @@ export default function App() {
     setScanComplete(false);
     setIsScanning(false);
     setIsApproved(false);
-    setRiskScore(85);
+    setRiskScore(0);
   };
 
   return (
@@ -193,9 +194,9 @@ export default function App() {
           </div>
           <div>
             <h1 className="font-bold text-lg tracking-wide flex items-center gap-2 text-white">
-              BrandLock <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-semibold uppercase">Engine Active</span>
+              BrandLock <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-semibold uppercase">Round 2 Prototype</span>
             </h1>
-            <p className="text-xs text-slate-400">Autonomous Content Risk Audit Platform</p>
+            <p className="text-xs text-slate-400">Brand Governance · Local Policy Audit</p>
           </div>
         </div>
 
@@ -205,7 +206,7 @@ export default function App() {
             className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition font-mono ${showDevInspector ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'}`}
           >
             <Code2 className="w-4 h-4 text-emerald-400" />
-            API Payload Inspector
+            Audit Details
           </button>
 
           <button 
@@ -292,7 +293,7 @@ export default function App() {
                   style={{ width: `${riskScore}%` }}
                 ></div>
               </div>
-              <p className="text-[10px] text-slate-400">Calculated across 6 compliance agents.</p>
+              <p className="text-[10px] text-slate-400">Calculated from the selected local policy checks.</p>
             </div>
 
             {/* Health Probes */}
@@ -302,8 +303,8 @@ export default function App() {
               </span>
               <div className="space-y-1 text-[10px] font-mono">
                 <div className="flex justify-between text-slate-400"><span>Engine Status:</span><span className="text-emerald-400">200 OK</span></div>
-                <div className="flex justify-between text-slate-400"><span>ChromaDB Vector:</span><span className="text-emerald-400">Synced</span></div>
-                <div className="flex justify-between text-slate-400"><span>Scan Latency:</span><span className="text-indigo-400">14ms</span></div>
+                <div className="flex justify-between text-slate-400"><span>Policy Rules:</span><span className="text-emerald-400">Built-in demo rules</span></div>
+                <div className="flex justify-between text-slate-400"><span>Execution:</span><span className="text-indigo-400">Browser-local</span></div>
               </div>
             </div>
           </div>
@@ -321,14 +322,14 @@ export default function App() {
             <div className="mb-6 bg-slate-900 border border-emerald-500/30 rounded-2xl p-4 font-mono text-xs text-slate-300 space-y-2 shadow-2xl">
               <div className="flex justify-between items-center border-b border-slate-800 pb-2">
                 <span className="text-emerald-400 font-bold flex items-center gap-2">
-                  <Code2 className="w-4 h-4" /> Live Execution Payload Inspector (REST / Vector Pipeline)
+                  <Code2 className="w-4 h-4" /> Local Policy Engine Execution Details
                 </span>
-                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">POST /api/v1/swarm/audit</span>
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">LOCAL RULE ENGINE</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px]">
                 <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
                   <span className="text-slate-500 block mb-1">// Request Body:</span>
-                  <pre className="text-indigo-300 whitespace-pre-wrap">{JSON.stringify({ content: campaignCopy, channel: "Press_Release", agents: 6 }, null, 2)}</pre>
+                  <pre className="text-indigo-300 whitespace-pre-wrap">{JSON.stringify({ content: campaignCopy, channel: "Enterprise Press Release", execution: "browser-local rule checks" }, null, 2)}</pre>
                 </div>
                 <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
                   <span className="text-slate-500 block mb-1">// Synthesized Response:</span>
@@ -360,12 +361,12 @@ export default function App() {
                   {isScanning ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      Swarm Parsing...
+                      Checking...
                     </>
                   ) : (
                     <>
                       <Zap className="w-4 h-4 fill-white" />
-                      Run AI Swarm Check
+                      Run Policy Audit
                     </>
                   )}
                 </button>
@@ -379,8 +380,9 @@ export default function App() {
                     <span><strong>Brand Lead Mode Active:</strong> Review creator fixes, inspect audit logs, and give final publish approval.</span>
                   </div>
                   <button 
+                    disabled={!scanComplete || findings.some((item) => !item.fixed)}
                     onClick={() => setIsApproved(!isApproved)}
-                    className={`px-4 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${isApproved ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+                    className={`px-4 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed ${isApproved ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
                   >
                     <CheckSquare className="w-4 h-4" />
                     {isApproved ? 'Approved for Publish ✅' : 'Approve Campaign Copy'}
@@ -400,7 +402,7 @@ export default function App() {
 
                     <textarea
                       value={campaignCopy}
-                      onChange={(e) => setCampaignCopy(e.target.value)}
+                      onChange={(e) => { setCampaignCopy(e.target.value); setScanComplete(false); setFindings([]); setRiskScore(0); setIsApproved(false); }}
                       rows={7}
                       readOnly={userRole === 'manager'}
                       className={`w-full bg-slate-950 border rounded-xl p-3.5 text-xs text-slate-200 focus:outline-none transition resize-none leading-relaxed font-sans ${userRole === 'manager' ? 'border-indigo-800/40 opacity-90' : 'border-slate-800 focus:border-indigo-500'}`}
@@ -423,7 +425,7 @@ export default function App() {
                     <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-4 space-y-2 shadow-lg">
                       <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
                         <Terminal className="w-4 h-4 text-emerald-400" />
-                        <span className="text-xs font-bold text-slate-300">Swarm Agent Console</span>
+                        <span className="text-xs font-bold text-slate-300">Audit Execution Log</span>
                       </div>
                       <div className="bg-slate-950 rounded-xl p-3 font-mono text-[11px] text-slate-300 space-y-1.5 max-h-44 overflow-y-auto border border-slate-800/80">
                         {agentLogs.map((log, i) => (
@@ -440,7 +442,7 @@ export default function App() {
                     <div className="flex justify-between items-center border-b border-slate-800 pb-3">
                       <div>
                         <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">Governance Findings</h3>
-                        <p className="text-[11px] text-slate-400">Synthesized with RAG citations</p>
+                        <p className="text-[11px] text-slate-400">Generated by local rule checks</p>
                       </div>
                       {scanComplete && findings.length > 0 && (
                         <button
@@ -456,22 +458,22 @@ export default function App() {
                     {!scanComplete && !isScanning && (
                       <div className="text-center py-12 text-slate-500 space-y-3">
                         <ShieldCheck className="w-12 h-12 mx-auto stroke-1 text-slate-600" />
-                        <p className="text-xs">Click "Run AI Swarm Check" to execute dynamic text audit.</p>
+                        <p className="text-xs">Click "Run Policy Audit" to execute dynamic text audit.</p>
                       </div>
                     )}
 
                     {isScanning && (
                       <div className="text-center py-12 text-indigo-400 space-y-3">
                         <RefreshCw className="w-8 h-8 animate-spin mx-auto text-indigo-500" />
-                        <p className="text-xs text-slate-400">Agents retrieving vector chunks & scanning policies...</p>
+                        <p className="text-xs text-slate-400">The browser is checking the built-in demonstration rules.</p>
                       </div>
                     )}
 
                     {scanComplete && findings.length === 0 && (
                       <div className="text-center py-12 text-emerald-400 space-y-2">
                         <CheckCircle className="w-12 h-12 mx-auto stroke-1 text-emerald-400" />
-                        <h4 className="font-bold text-sm text-white">No Policy Violations Detected!</h4>
-                        <p className="text-xs text-slate-400">Content is 100% compliant with Acme Brand Rules.</p>
+                        <h4 className="font-bold text-sm text-white">No matches found by the current checks</h4>
+                        <p className="text-xs text-slate-400">This does not establish full brand compliance. Only the included checks were run.</p>
                       </div>
                     )}
 
@@ -526,15 +528,15 @@ export default function App() {
           {activeTab === 'rules' && (
             <div className="max-w-4xl mx-auto bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Database className="w-5 h-5 text-indigo-400" /> ChromaDB Vector Policy Storage
+                <Database className="w-5 h-5 text-indigo-400" /> Built-in Demonstration Policy Rules
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                  <h4 className="text-xs font-bold text-indigo-400 uppercase mb-2">Vector Chunk #102 — Tone Policy</h4>
+                  <h4 className="text-xs font-bold text-indigo-400 uppercase mb-2">Rule Example — Tone and Claims</h4>
                   <p className="text-xs text-slate-300 leading-relaxed">Maintain authoritative executive voice. Flag informal launch phrases and comparative superlatives.</p>
                 </div>
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                  <h4 className="text-xs font-bold text-rose-400 uppercase mb-2">Vector Chunk #408 — Confidentiality</h4>
+                  <h4 className="text-xs font-bold text-rose-400 uppercase mb-2">Rule Example — Confidentiality</h4>
                   <p className="text-xs text-slate-300 leading-relaxed">Detect internal email domains (@acme.corp, dev/admin endpoints) and unannounced project codenames.</p>
                 </div>
               </div>
@@ -544,7 +546,7 @@ export default function App() {
           {activeTab === 'analytics' && (
             <div className="max-w-4xl mx-auto bg-slate-900/60 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Server className="w-5 h-5 text-indigo-400" /> Risk Score & Analytics Metrics
+                <Server className="w-5 h-5 text-indigo-400" /> Audit Session Metrics
               </h2>
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center">
