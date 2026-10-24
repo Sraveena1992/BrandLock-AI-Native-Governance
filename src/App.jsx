@@ -150,6 +150,12 @@ export default function App() {
     setScanComplete(true);
   };
 
+  const replaceAllCaseInsensitive = (source, target, replacement) => {
+    if (!target) return source;
+    const escaped = target.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\const applyAutoFix = (id) => {');
+    return source.replace(new RegExp(escaped, 'gi'), replacement);
+  };
+
   const applyAutoFix = (id) => {
     const itemToFix = findings.find((f) => f.id === id);
     if (!itemToFix) return;
@@ -159,7 +165,7 @@ export default function App() {
     );
 
     if (itemToFix.target && itemToFix.replacement) {
-      setCampaignCopy((prev) => prev.replace(itemToFix.target, itemToFix.replacement));
+      setCampaignCopy((prev) => replaceAllCaseInsensitive(prev, itemToFix.target, itemToFix.replacement));
     }
 
     const remaining = findings.filter((item) => item.id !== id && !item.fixed);
@@ -172,7 +178,7 @@ export default function App() {
     let updatedText = campaignCopy;
     findings.forEach((item) => {
       if (item.target && item.replacement) {
-        updatedText = updatedText.split(item.target).join(item.replacement);
+        updatedText = replaceAllCaseInsensitive(updatedText, item.target, item.replacement);
       }
     });
     setCampaignCopy(updatedText);
@@ -328,6 +334,11 @@ export default function App() {
 
         {/* Content Workspace */}
         <main className="flex-1 bg-slate-950 overflow-y-auto p-6">
+          <div className="md:hidden flex gap-2 mb-5">
+            {[['studio', 'Content Auditor'], ['rules', 'Policy Rules'], ['analytics', 'Session Metrics']].map(([tab, label]) => (
+              <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-1 px-2 py-2 rounded-lg border text-[11px] font-semibold ${activeTab === tab ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-200' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>{label}</button>
+            ))}
+          </div>
           {/* Execution Details Panel */}
           {showDevInspector && (
             <div className="mb-6 bg-slate-900 border border-emerald-500/30 rounded-2xl p-4 font-mono text-xs text-slate-300 space-y-2 shadow-2xl">
@@ -480,7 +491,7 @@ export default function App() {
                       </div>
                     )}
 
-                    {scanComplete && findings.length === 0 && (
+                    {scanComplete && findings.length === 0 && !hasEditsSinceAudit && (
                       <div className="text-center py-12 text-emerald-400 space-y-2">
                         <CheckCircle className="w-12 h-12 mx-auto stroke-1 text-emerald-400" />
                         <h4 className="font-bold text-sm text-white">No matches found by the current checks</h4>
