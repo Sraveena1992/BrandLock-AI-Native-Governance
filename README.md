@@ -16,10 +16,10 @@ BrandLock is a pre-publish policy-review prototype. A user can:
 4. Apply a suggested replacement to an individual finding or use Fix All.
 5. Re-run the audit on the revised copy.
 6. Switch between Creator and Brand Lead interface modes.
-7. Use the Brand Lead approval control after an audit is complete and all findings have been marked fixed.
+7. Re-run the audit after applying corrections, then use the Brand Lead approval control when the fresh audit has no outstanding findings.
 8. View session-level issue, fix and risk indicators.
 
-The audit currently uses deterministic JavaScript rules executed in the browser. Findings include a severity, explanation, target text, suggested replacement and a **demonstration rule label**. These labels are not citations retrieved from an uploaded brand manual.
+The audit currently uses deterministic JavaScript rules executed in the browser. Repeated matching terms are de-duplicated in the findings list, and the risk indicator is recalculated from unresolved finding severity. Findings include a severity, explanation, target text, suggested replacement and a **demonstration rule label**. These labels are not citations retrieved from an uploaded brand manual.
 
 ## Scope and limitations — please read
 
