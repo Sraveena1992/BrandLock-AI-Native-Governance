@@ -38,7 +38,7 @@ export default function App() {
   const defaultText = "Get ready for Acme's secret launch! We offer a 50% discount on all cloud services next week. No other provider comes close to our speed. Contact internal-project-alpha@acme.corp to pre-register today.";
   const [campaignCopy, setCampaignCopy] = useState(defaultText);
 
-  const [agentLogs, setAgentLogs] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [findings, setFindings] = useState([]);
   const [riskScore, setRiskScore] = useState(0);
 
@@ -57,7 +57,7 @@ export default function App() {
             id: 'conf-' + Math.random().toString(36).substr(2, 4),
             category: 'Confidentiality Leak',
             severity: 'High',
-            agent: 'Security & Leak Agent',
+            ruleGroup: 'Confidentiality rules',
             target: email,
             replacement: 'contact@acme.com',
             issue: `Internal domain or unauthorized address exposure: "${email}"`,
@@ -95,7 +95,7 @@ export default function App() {
           id: 'claim-' + Math.random().toString(36).substr(2, 4),
           category: 'Unverified Claim',
           severity: 'Medium',
-          agent: 'Fact Check Agent',
+          ruleGroup: 'Claims rules',
           target: claim,
           replacement: claim.toLowerCase().includes('discount') ? 'special promo offer' : 'industry-leading standards',
           issue: `Unsubstantiated legal or financial claim: "${claim}"`,
@@ -124,7 +124,7 @@ export default function App() {
     const { detected, risk } = analyzeTextDynamically(campaignCopy);
 
     const logSequence = [
-      '🤖 [Swarm Orchestrator]: [Policy Engine]: Starting browser-local rule checks...',
+      '[Policy Engine]: Starting browser-local rule checks...',
       '🔍 [Check 1 - Confidentiality]: Inspecting internal addresses and selected disclosure phrases...',
       '📚 [Check 2 - Claims]: Inspecting selected promotional and comparative claims...',
       '⚖️ [Synthesis]: Grouping matched rules into review findings...',
@@ -258,7 +258,7 @@ export default function App() {
                   className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'rules' ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
                 >
                   <Layers className="w-4 h-4" />
-                  <span>Vector Index</span>
+                  <span>Policy Rules</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('analytics')}
@@ -311,7 +311,7 @@ export default function App() {
 
         {/* Content Workspace */}
         <main className="flex-1 bg-slate-950 overflow-y-auto p-6">
-          {/* API Inspector Panel */}
+          {/* Execution Details Panel */}
           {showDevInspector && (
             <div className="mb-6 bg-slate-900 border border-emerald-500/30 rounded-2xl p-4 font-mono text-xs text-slate-300 space-y-2 shadow-2xl">
               <div className="flex justify-between items-center border-b border-slate-800 pb-2">
@@ -414,7 +414,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Swarm Console Terminal */}
+                  {/* Policy Audit Console */}
                   {(isScanning || agentLogs.length > 0) && (
                     <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-4 space-y-2 shadow-lg">
                       <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
@@ -485,7 +485,7 @@ export default function App() {
                                 </span>
                                 <span className="text-xs font-bold text-slate-200">{item.category}</span>
                               </div>
-                              <span className="text-[10px] text-slate-400">{item.agent}</span>
+                              <span className="text-[10px] text-slate-400">{item.ruleGroup}</span>
                             </div>
 
                             <p className="text-xs text-slate-300 mb-2">{item.issue}</p>
