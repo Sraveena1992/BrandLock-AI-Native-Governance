@@ -75,7 +75,7 @@ export default function App() {
         id: 'code-' + Math.random().toString(36).substr(2, 4),
         category: 'NDA Disclosure',
         severity: 'High',
-        agent: 'Security & Leak Agent',
+        ruleGroup: 'Confidentiality rules',
         target: text.toLowerCase().includes('secret launch') ? 'secret launch' : 'project-alpha',
         replacement: 'upcoming feature release',
         issue: 'Unannounced product internal codename or launch status',
@@ -119,7 +119,7 @@ export default function App() {
     setIsScanning(true);
     setScanComplete(false);
     setIsApproved(false);
-    setAgentLogs([]);
+    setAuditLogs([]);
 
     const { detected, risk } = analyzeTextDynamically(campaignCopy);
 
@@ -133,7 +133,7 @@ export default function App() {
       '✅ [Policy Engine]: Local audit completed. Review each finding before making a decision.'
     ];
 
-    setAgentLogs(logSequence);
+    setAuditLogs(logSequence);
     setFindings(detected);
     setRiskScore(risk);
     setIsScanning(false);
@@ -171,7 +171,7 @@ export default function App() {
   const handleFullReset = () => {
     setCampaignCopy(defaultText);
     setFindings([]);
-    setAgentLogs([]);
+    setAuditLogs([]);
     setScanComplete(false);
     setIsScanning(false);
     setIsApproved(false);
@@ -415,14 +415,14 @@ export default function App() {
                   </div>
 
                   {/* Policy Audit Console */}
-                  {(isScanning || agentLogs.length > 0) && (
+                  {(isScanning || auditLogs.length > 0) && (
                     <div className="bg-slate-900/80 rounded-2xl border border-slate-800 p-4 space-y-2 shadow-lg">
                       <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
                         <Terminal className="w-4 h-4 text-emerald-400" />
                         <span className="text-xs font-bold text-slate-300">Audit Execution Log</span>
                       </div>
                       <div className="bg-slate-950 rounded-xl p-3 font-mono text-[11px] text-slate-300 space-y-1.5 max-h-44 overflow-y-auto border border-slate-800/80">
-                        {agentLogs.map((log, i) => (
+                        {auditLogs.map((log, i) => (
                           <div key={i} className="leading-normal">{log}</div>
                         ))}
                       </div>
