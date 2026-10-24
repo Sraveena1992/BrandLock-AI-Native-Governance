@@ -51,8 +51,8 @@ export default function App() {
 
     // 1. Confidentiality / NDA Leak Rules
     const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
-    const emailMatches = text.match(emailRegex);
-    if (emailMatches) {
+    const emailMatches = [...new Set((text.match(emailRegex) || []).map((email) => email.toLowerCase()))];
+    if (emailMatches.length) {
       emailMatches.forEach((email) => {
         if (email.includes('internal') || email.includes('.corp') || email.includes('admin') || email.includes('dev')) {
           detected.push({
@@ -72,26 +72,28 @@ export default function App() {
       });
     }
 
-    if (text.toLowerCase().includes('secret launch') || text.toLowerCase().includes('project-alpha')) {
+    const lowerText = text.toLowerCase();
+    ['secret launch', 'project-alpha'].forEach((phrase) => {
+      if (!lowerText.includes(phrase)) return;
       detected.push({
         id: 'code-' + detected.length,
         category: 'NDA Disclosure',
         severity: 'High',
         ruleGroup: 'Confidentiality rules',
-        target: text.toLowerCase().includes('secret launch') ? 'secret launch' : 'project-alpha',
+        target: phrase,
         replacement: 'upcoming feature release',
         issue: 'Unannounced product internal codename or launch status',
         citation: 'Built-in demonstration rule — not linked to an uploaded policy.',
         suggestion: 'Use standardized external release terminology.',
         fixed: false
       });
-      calculatedRisk += 30;
-    }
+      calculatedRisk += 40;
+    });
 
     // 2. Fact & Claim Verifier Rules
     const discountRegex = /(\d+%\s*discount|\bguarantee\b|\b100%\b|\bno other provider\b)/gi;
-    const claimMatches = text.match(discountRegex);
-    if (claimMatches) {
+    const claimMatches = [...new Set((text.match(discountRegex) || []).map((claim) => claim.toLowerCase()))];
+    if (claimMatches.length) {
       claimMatches.forEach((claim) => {
         detected.push({
           id: 'claim-' + detected.length,
@@ -114,7 +116,8 @@ export default function App() {
       calculatedRisk = 0;
     }
 
-    return { detected, risk: Math.min(100, calculatedRisk) };
+    const unresolvedRisk = detected.reduce((total, item) => total + (item.severity === 'High' ? 40 : 20), 0);
+    return { detected, risk: Math.min(100, unresolvedRisk) };
   };
 
   const runPolicyAudit = () => {
@@ -164,7 +167,7 @@ export default function App() {
     let updatedText = campaignCopy;
     findings.forEach((item) => {
       if (item.target && item.replacement) {
-        updatedText = updatedText.replace(item.target, item.replacement);
+        updatedText = updatedText.split(item.target).join(item.replacement);
       }
     });
     setCampaignCopy(updatedText);
