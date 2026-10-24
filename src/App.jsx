@@ -43,6 +43,7 @@ export default function App() {
   const [riskScore, setRiskScore] = useState(0);
   const [auditRunCount, setAuditRunCount] = useState(0);
   const [lastAuditAt, setLastAuditAt] = useState(null);
+  const [hasEditsSinceAudit, setHasEditsSinceAudit] = useState(false);
 
   // Dynamic Rule Engine Execution
   const analyzeTextDynamically = (text) => {
@@ -51,7 +52,7 @@ export default function App() {
 
     // 1. Confidentiality / NDA Leak Rules
     const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi;
-    const emailMatches = [...new Set((text.match(emailRegex) || []).map((email) => email.toLowerCase()))];
+    const emailMatches = [...new Map((text.match(emailRegex) || []).map((email) => [email.toLowerCase(), email])).values()];
     if (emailMatches.length) {
       emailMatches.forEach((email) => {
         if (email.includes('internal') || email.includes('.corp') || email.includes('admin') || email.includes('dev')) {
@@ -92,7 +93,7 @@ export default function App() {
 
     // 2. Fact & Claim Verifier Rules
     const discountRegex = /(\d+%\s*discount|\bguarantee\b|\b100%\b|\bno other provider\b)/gi;
-    const claimMatches = [...new Set((text.match(discountRegex) || []).map((claim) => claim.toLowerCase()))];
+    const claimMatches = [...new Map((text.match(discountRegex) || []).map((claim) => [claim.toLowerCase(), claim])).values()];
     if (claimMatches.length) {
       claimMatches.forEach((claim) => {
         detected.push({
@@ -124,6 +125,7 @@ export default function App() {
     setIsScanning(true);
     setScanComplete(false);
     setIsApproved(false);
+    setHasEditsSinceAudit(false);
     setAuditLogs([]);
 
     const { detected, risk } = analyzeTextDynamically(campaignCopy);
@@ -161,6 +163,8 @@ export default function App() {
 
     const remaining = findings.filter((item) => item.id !== id && !item.fixed);
     setRiskScore(Math.min(100, remaining.reduce((total, item) => total + (item.severity === 'High' ? 40 : 20), 0)));
+    setHasEditsSinceAudit(true);
+    setIsApproved(false);
   };
 
   const applyAllFixes = () => {
@@ -173,6 +177,8 @@ export default function App() {
     setCampaignCopy(updatedText);
     setFindings((prev) => prev.map((item) => ({ ...item, fixed: true })));
     setRiskScore(0);
+    setIsApproved(false);
+    setHasEditsSinceAudit(true);
   };
 
   const handleFullReset = () => {
@@ -185,6 +191,7 @@ export default function App() {
     setRiskScore(0);
     setAuditRunCount(0);
     setLastAuditAt(null);
+    setHasEditsSinceAudit(false);
   };
 
   return (
@@ -383,12 +390,12 @@ export default function App() {
                     <span><strong>Brand Lead Mode Active:</strong> Review creator fixes, inspect audit logs, and give final publish approval.</span>
                   </div>
                   <button 
-                    disabled={!scanComplete || findings.some((item) => !item.fixed)}
+                    disabled={!scanComplete || hasEditsSinceAudit || findings.some((item) => !item.fixed)}
                     onClick={() => setIsApproved(!isApproved)}
                     className={`px-4 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed ${isApproved ? 'bg-emerald-600 text-white' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
                   >
                     <CheckSquare className="w-4 h-4" />
-                    {isApproved ? 'Approved for Publish ✅' : 'Approve Campaign Copy'}
+                    {isApproved ? 'Approved for Publish ✅' : hasEditsSinceAudit ? 'Re-run Audit to Verify' : 'Approve Campaign Copy'}
                   </button>
                 </div>
               )}
@@ -405,7 +412,7 @@ export default function App() {
 
                     <textarea
                       value={campaignCopy}
-                      onChange={(e) => { setCampaignCopy(e.target.value); setScanComplete(false); setFindings([]); setRiskScore(0); setIsApproved(false); }}
+                      onChange={(e) => { setCampaignCopy(e.target.value); setScanComplete(false); setFindings([]); setRiskScore(0); setIsApproved(false); setHasEditsSinceAudit(false); setAuditLogs([]); }}
                       rows={7}
                       readOnly={userRole === 'manager'}
                       className={`w-full bg-slate-950 border rounded-xl p-3.5 text-xs text-slate-200 focus:outline-none transition resize-none leading-relaxed font-sans ${userRole === 'manager' ? 'border-indigo-800/40 opacity-90' : 'border-slate-800 focus:border-indigo-500'}`}
