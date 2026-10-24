@@ -1,82 +1,82 @@
-# 🛡️ BrandLock — AI-Native Brand Governance Engine
+# BrandLock — AI-Native Brand Governance
 
-> **TechCircuit / Inkloom AI Competition — Round 2 Project Submission**  
-> **Solo Participant:** Raveena Sharma (GitHub: `@Sraveena1992`)  
-> **Live Web Application:** https://brandlock-ai-native-governance.onrender.com
+**Round 2 build · TechCircuit / competition track to be confirmed against Round 1 record**
 
----
+- **Live application:** https://brandlock-ai-native-governance.onrender.com
+- **Source:** https://github.com/Sraveena1992/BrandLock-AI-Native-Governance
+- **Current implementation:** React + Vite browser-based prototype
 
-## 🚀 Executive Summary
+## What works in this build
 
-**BrandLock** is an enterprise-grade, AI-native brand compliance platform. Powered by an **autonomous 6-Agent Swarm Architecture**, BrandLock enforces pre-publish brand consistency, regulatory claims verification, and confidential data leak protection across enterprise communications before collateral reaches production.
+BrandLock is a pre-publish policy-review prototype. A user can:
 
-Unlike generic spelling or style tools, BrandLock grounds its reasoning in a **ChromaDB Vector Index** containing company-specific brand rules, generating explainable citations and 1-Click contextual AutoFixes.
+1. Paste or edit campaign copy in the Content Auditor.
+2. Run the built-in local policy audit.
+3. Review findings for selected confidentiality patterns and selected promotional/comparative claims.
+4. Apply a suggested replacement to an individual finding or use Fix All.
+5. Re-run the audit on the revised copy.
+6. Switch between Creator and Brand Lead interface modes.
+7. Use the Brand Lead approval control after an audit is complete and all findings have been marked fixed.
+8. View session-level issue, fix and risk indicators.
 
----
+The audit currently uses deterministic JavaScript rules executed in the browser. Findings include a severity, explanation, target text, suggested replacement and a **demonstration rule label**. These labels are not citations retrieved from an uploaded brand manual.
 
-## 🌟 Key Functional Features
+## Scope and limitations — please read
 
-- 🤖 **6-Agent Swarm Orchestrator:** Parallel execution across specialized AI agents:
-  1. *Tone & Persona Agent:* Validates executive voice alignment.
-  2. *Terminology Matcher:* Prevents banned industry jargon via Vector DB lookups.
-  3. *Fact & Claim Verifier:* Validates promotional claims against financial policies.
-  4. *Visual Brand Token Agent:* Checks color tokens, hex values, and typography rules.
-  5. *Accessibility Auditor:* Ensures WCAG 2.1 compliance.
-  6. *Confidentiality Guard:* Catch internal domains (@acme.corp), codenames, and NDA disclosures.
-- 📖 **Explainable RAG Citations:** Direct mapping of violations to exact page and clause numbers in corporate brand manuals.
-- ⚡ **1-Click Contextual AutoFix Engine:** Instantly transforms flagged copy into compliant text without losing tone context.
-- 👥 **Multi-Role Collaborative Review:** Real-time role switching between **Creator Mode** (editing & fixing) and **Brand Lead Mode** (governance approval & audit tracking).
-- 📡 **System Health & API Probes:** Real-time system latency monitoring (18ms), vector DB sync checks, and API health verification.
+This repository currently contains a front-end prototype. The following are **not implemented as connected production capabilities**:
 
+- No production LLM, external AI API, or autonomous multi-agent orchestration.
+- No ChromaDB instance, vector database, or live RAG retrieval.
+- No upload or parsing of company brand-guideline PDFs.
+- No source-grounded policy citations.
+- No automated logo, image, colour-palette or typography inspection.
+- No complete WCAG accessibility audit.
+- No backend persistence, authenticated users, or cross-user collaboration.
+- Audit history and approval state are not stored in a server database.
+- The built-in checks cover selected patterns only; a clean result does not certify that content is fully compliant.
 
+The interface includes prototype/demo content to illustrate the intended direction. Do not interpret demonstration rule labels or local session metrics as external verification, legal advice, or production monitoring.
 
-## 🏗️ System Tech Architecture
-[Input Layer] -> Campaign Copy Input
-│
-▼
-[Swarm Orchestrator] -> Spawns 6 Parallel Autonomous Agents
-│
-├──► Tone & Persona Agent
-├──► Terminology Matcher Agent
-├──► Fact & Claim Verifier Agent
-├──► Visual Brand Token Agent
-├──► Accessibility Auditor Agent
-└──► Confidentiality Guard Agent
-│
-▼
-[Vector Retrieval] -> ChromaDB Policy Index (RAG)
-│
-▼
-[Execution Output] -> Cited Findings + 1-Click AutoFix Pipeline
+## Technology and implementation
 
----
+- React 18
+- Vite 5
+- JavaScript / JSX
+- Tailwind CSS 3
+- Lucide React
 
-## 🚀 Round 3 Major Ecosystem Roadmap
+The current data flow is local to the browser:
 
-1. **Figma & Canva Extension Plugins:** Native visual identity audit toolbar embedded directly inside design canvases.
-2. **Automated Guideline Ingestion Engine:** Automated PDF parser and vector chunker for uploading custom enterprise brand books.
-3. **Enterprise Governance Risk Analytics:** Department-wide risk trends, violation heatmaps, and clarity scoring dashboards.
+`Campaign text → deterministic rule checks → structured findings → suggested text replacements → local session metrics`
 
----
+No model or remote inference endpoint is called by the current audit flow.
 
-## 🛠️ Local Development Setup
+## Run locally
+
+Requirements: Node.js and npm.
 
 ```bash
-# Clone Repository
-git clone [https://github.com/Sraveena1992/BrandLock-AI-Native-Governance.git](https://github.com/Sraveena1992/BrandLock-AI-Native-Governance.git)
-
-# Navigate into project directory
+git clone https://github.com/Sraveena1992/BrandLock-AI-Native-Governance.git
 cd BrandLock-AI-Native-Governance
-
-# Install dependencies
 npm install
-
-# Run local development server
 npm run dev
+```
 
+Create a production build:
 
-## Built with React, Vite, Tailwind CSS, and Lucide Icons for Render Static Site Deployment.
+```bash
+npm run build
+npm run preview
+```
 
+## Round 3 — planned major improvements
 
+These are roadmap commitments, not completed Round 2 features.
 
+1. **Brand-manual ingestion and evidence-grounded retrieval:** upload PDF guidelines, extract and index policy clauses, and show traceable page-level evidence for each relevant finding.
+2. **Connected, independently testable analysis services:** implement dedicated tone, terminology, claims, visual-identity and confidentiality checks behind a real orchestration/API layer, with clear confidence and failure handling.
+3. **Persistent governance and approval workflow:** add authenticated reviewer roles, saved audit history, version comparisons, approval records and organization-level risk analytics.
 
+## Round 1 continuity
+
+Round 1 proposed a broader brand-governance platform. Round 2 narrows the delivered scope to an interactive browser-local text policy audit and correction workflow. The larger integrations above remain future work and are not represented as shipped functionality.
