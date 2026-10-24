@@ -1,3 +1,4 @@
+import Round2GovernanceHub from './Round2GovernanceHub.jsx';
 import React, { useState } from 'react';
 import { 
   Shield, 
@@ -636,6 +637,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <Round2GovernanceHub />
     </div>
   );
 }

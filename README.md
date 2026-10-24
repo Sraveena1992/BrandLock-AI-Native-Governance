@@ -69,13 +69,21 @@ npm run build
 npm run preview
 ```
 
-## Round 3 — planned major improvements
+## Round 2 upgrades added in the governance workspace
 
-These are roadmap commitments, not completed Round 2 features.
+The **Governance Hub** is available from the floating button in the application.
 
-1. **Brand-manual ingestion and evidence-grounded retrieval:** upload PDF guidelines, extract and index policy clauses, and show traceable page-level evidence for each relevant finding.
-2. **Connected, independently testable analysis services:** implement dedicated tone, terminology, claims, visual-identity and confidentiality checks behind a real orchestration/API layer, with clear confidence and failure handling.
-3. **Persistent governance and approval workflow:** add authenticated reviewer roles, saved audit history, version comparisons, approval records and organization-level risk analytics.
+1. **PDF guideline ingestion + evidence retrieval:** browser-side PDF.js extracts selectable text, splits it into page-level clauses, and provides keyword retrieval with document and page references. Scanned image-only PDFs are not OCR'd. Retrieval is lexical, not vector/semantic RAG.
+2. **Specialist review orchestration:** five independent deterministic reviewers cover selected tone, terminology, claims, confidentiality and visual-readiness checks. A coordinator combines findings and attaches relevant guideline excerpts when keyword overlap exists. These are rule-based agents, not connected LLM agents; the visual reviewer is an advisory limitation check and does not inspect images.
+3. **Persistent local governance trail:** reviewer-labeled decisions, copy snapshots, findings and per-copy revision counts are saved in browser localStorage and can be exported as JSON. This is device-local persistence, not authenticated enterprise approval or server-side audit storage.
+
+PDF extraction, indexing, review and storage run in the browser. Users should verify extracted clauses and page references before relying on them.
+
+## Round 3 — harder next-stage improvements
+
+1. **Multimodal brand-forensics engine:** inspect uploaded creative assets and rendered campaign pages for logo geometry, colour tokens, typography, spacing, accessibility and cross-channel drift; return annotated evidence and severity-ranked diffs.
+2. **Policy-as-code release gate and adversarial red-team harness:** integrate with GitHub/CI and content publishing workflows to block risky releases, run mutation/fuzz tests against policy rules, detect bypasses and produce reproducible signed test reports.
+3. **Privacy-preserving cross-tenant governance intelligence:** build tenant-isolated policy stores, encryption/key management, role/attribute-based access, immutable tamper-evident audit events and privacy-safe aggregate risk benchmarks without exposing one customer's content to another.
 
 ## Round 1 continuity
 
