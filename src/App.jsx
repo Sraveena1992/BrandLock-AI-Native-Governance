@@ -152,8 +152,17 @@ export default function App() {
 
   const replaceAllCaseInsensitive = (source, target, replacement) => {
     if (!target) return source;
-    const escaped = target.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\const applyAutoFix = (id) => {');
-    return source.replace(new RegExp(escaped, 'gi'), replacement);
+    const lowerSource = source.toLowerCase();
+    const lowerTarget = target.toLowerCase();
+    let result = '';
+    let cursor = 0;
+    let matchIndex = lowerSource.indexOf(lowerTarget, cursor);
+    while (matchIndex !== -1) {
+      result += source.slice(cursor, matchIndex) + replacement;
+      cursor = matchIndex + target.length;
+      matchIndex = lowerSource.indexOf(lowerTarget, cursor);
+    }
+    return result + source.slice(cursor);
   };
 
   const applyAutoFix = (id) => {
