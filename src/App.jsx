@@ -55,7 +55,8 @@ export default function App() {
     const emailMatches = [...new Map((text.match(emailRegex) || []).map((email) => [email.toLowerCase(), email])).values()];
     if (emailMatches.length) {
       emailMatches.forEach((email) => {
-        if (email.includes('internal') || email.includes('.corp') || email.includes('admin') || email.includes('dev')) {
+        const normalizedEmail = email.toLowerCase();
+        if (normalizedEmail.includes('internal') || normalizedEmail.includes('.corp') || normalizedEmail.includes('admin') || normalizedEmail.includes('dev')) {
           detected.push({
             id: 'conf-' + detected.length,
             category: 'Confidentiality Leak',
