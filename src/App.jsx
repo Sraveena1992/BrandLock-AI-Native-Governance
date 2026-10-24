@@ -265,7 +265,7 @@ export default function App() {
                   className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${activeTab === 'analytics' ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  <span>Risk Metrics</span>
+                  <span>Session Metrics</span>
                 </button>
               </nav>
             </div>
@@ -275,10 +275,10 @@ export default function App() {
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
                   <Gauge className="w-4 h-4 text-indigo-400" />
-                  Policy Exposure
+                  Rule Match Score
                 </span>
                 <span className={`text-xs font-extrabold ${riskScore > 50 ? 'text-rose-400' : riskScore > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                  {riskScore}% RISK
+                  {riskScore}% RULE SCORE
                 </span>
               </div>
               <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
@@ -545,7 +545,7 @@ export default function App() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center">
                   <span className="text-2xl font-extrabold text-emerald-400">{100 - riskScore}%</span>
-                  <p className="text-xs text-slate-400 mt-1">Compliance Score</p>
+                  <p className="text-xs text-slate-400 mt-1">No-Match Indicator</p>
                 </div>
                 <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center">
                   <span className="text-2xl font-extrabold text-indigo-400">{findings.length}</span>
